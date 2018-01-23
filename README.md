@@ -7,7 +7,7 @@ Simple autosplitter for the game Escape Goat 2
   - Click the Activate autosplitter button
   
 ## Splits
-  - Are predetermined and happen at the end of each level
-  - Starts when hitting New Game
+  - Timing starts when hitting New Game
+  - Splits happen at the fade out of each level
   - RT Ends when entering the final door
   - GT Ends on the fade out
