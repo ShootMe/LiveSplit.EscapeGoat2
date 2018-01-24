@@ -20,6 +20,10 @@ namespace LiveSplit.EscapeGoat2 {
 			int x = SceneManager.Read<int>(Program, 0x4, 0x84, 0x58);
 			//SceneManager.ActionSceneInstance.GameState._currentPosition._y
 			int y = SceneManager.Read<int>(Program, 0x4, 0x84, 0x5c);
+			if (x < 0 || x > 20 || y < 0 || y > 30) {
+				x = -1;
+				y = -1;
+			}
 			return new MapPosition() { X = x, Y = y };
 		}
 		public string RoomName() {
@@ -28,10 +32,20 @@ namespace LiveSplit.EscapeGoat2 {
 			if (string.IsNullOrEmpty(roomName)) {
 				//SceneManager.ActionSceneInstance.PositionTracker.SeqMap.Map[x,y]
 				MapPosition pos = CurrentPosition();
-				int length = SceneManager.Read<int>(Program, 0x4, 0x5c, 0x7c, 0x8, 0xc);
-				roomName = SceneManager.Read(Program, 0x4, 0x5c, 0x7c, 0x8, 0x1c + (pos.X * length + pos.Y) * 0x20, 0x0);
+				if (pos.X >= 0) {
+					int length = SceneManager.Read<int>(Program, 0x4, 0x5c, 0x7c, 0x8, 0xc);
+					roomName = SceneManager.Read(Program, 0x4, 0x5c, 0x7c, 0x8, 0x1c + (pos.X * length + pos.Y) * 0x20, 0x0);
+				}
 			}
 			return roomName;
+		}
+		public int OrbCount() {
+			//SceneManager.ActionSceneInstance.GameState._orbObtainedPositions._size
+			return SceneManager.Read<int>(Program, 0x4, 0x84, 0x10, 0xc);
+		}
+		public int SecretRoomCount() {
+			//SceneManager.ActionSceneInstance.GameState._secretRoomsBeaten._size
+			return SceneManager.Read<int>(Program, 0x4, 0x84, 0x14, 0xc);
 		}
 		public bool GoatInvulnerable() {
 			//SceneManager.ActionSceneInstance._player.Invulnerable

@@ -14,6 +14,7 @@ namespace LiveSplit.Memory {
 			if (targetProcess == null || address == IntPtr.Zero) { return default(T); }
 
 			int last = OffsetAddress(targetProcess, ref address, offsets);
+			if (address == IntPtr.Zero) { return default(T); }
 
 			Type type = typeof(T);
 			type = (type.IsEnum ? Enum.GetUnderlyingType(type) : type);
@@ -69,6 +70,7 @@ namespace LiveSplit.Memory {
 			if (targetProcess == null || address == IntPtr.Zero) { return buffer; }
 
 			int last = OffsetAddress(targetProcess, ref address, offsets);
+			if (address == IntPtr.Zero) { return buffer; }
 
 			int bytesRead;
 			WinAPI.ReadProcessMemory(targetProcess.Handle, address + last, buffer, numBytes, out bytesRead);
@@ -77,15 +79,18 @@ namespace LiveSplit.Memory {
 		public static string Read(this Process targetProcess, IntPtr address) {
 			if (targetProcess == null || address == IntPtr.Zero) { return string.Empty; }
 
-			int length = Read<int>(targetProcess, address, is64Bit ? 0x10 : 0x8);
-			return Encoding.Unicode.GetString(Read(targetProcess, address + (is64Bit ? 0x14 : 0xc), 2 * length));
+			int length = Read<int>(targetProcess, address, 0x4);
+			if (length < 0 || length > 2048) { return string.Empty; }
+			return Encoding.Unicode.GetString(Read(targetProcess, address + 0x8, 2 * length));
 		}
 		public static string Read(this Process targetProcess, IntPtr address, params int[] offsets) {
 			if (targetProcess == null || address == IntPtr.Zero) { return string.Empty; }
 
 			int last = OffsetAddress(targetProcess, ref address, offsets);
+			if (address == IntPtr.Zero) { return string.Empty; }
 
 			int length = Read<int>(targetProcess, address + last, 0x4);
+			if (length < 0 || length > 2048) { return string.Empty; }
 			return Encoding.Unicode.GetString(Read(targetProcess, address + last + 0x8, 2 * length));
 		}
 		public static string ReadAscii(this Process targetProcess, IntPtr address) {
@@ -124,6 +129,8 @@ namespace LiveSplit.Memory {
 			if (targetProcess == null) { return; }
 
 			int last = OffsetAddress(targetProcess, ref address, offsets);
+			if (address == IntPtr.Zero) { return; }
+
 			byte[] buffer = null;
 			if (typeof(T) == typeof(bool)) {
 				buffer = BitConverter.GetBytes(Convert.ToBoolean(value));
@@ -156,6 +163,8 @@ namespace LiveSplit.Memory {
 			if (targetProcess == null) { return; }
 
 			int last = OffsetAddress(targetProcess, ref address, offsets);
+			if (address == IntPtr.Zero) { return; }
+
 			int bytesWritten;
 			WinAPI.WriteProcessMemory(targetProcess.Handle, address + last, value, value.Length, out bytesWritten);
 		}

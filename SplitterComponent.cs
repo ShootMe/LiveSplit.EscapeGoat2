@@ -14,11 +14,11 @@ namespace LiveSplit.EscapeGoat2 {
 		public TimerModel Model { get; set; }
 		public IDictionary<string, Action> ContextMenuControls { get { return null; } }
 		private static string LOGFILE = "_EscapeGoat.log";
-		private static string[] keys = { "CurrentSplit", "Pointer", "MapPos", "Room", "Elapsed", "RoomElapsed", "TotalDeaths", "TotalBonks", "GameBeaten", "TitleShown", "TitleFadeTime", "EnteredDoor", "Invulnerable" };
+		private static string[] keys = { "CurrentSplit", "Pointer", "MapPos", "Room", "Elapsed", "RoomElapsed", "TotalDeaths", "TotalBonks", "GameBeaten", "TitleShown", "TitleFadeTime", "EnteredDoor", "Invulnerable", "OrbCount", "SecretRooms" };
 		private Dictionary<string, string> currentValues = new Dictionary<string, string>();
 		private SplitterMemory mem;
-		private int currentSplit = -1, lastLogCheck, elapsedCounter;
-		private bool hasLog = false, lastEnteredDoor, exitingLevel, lastInvulnerable;
+		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount;
+		private bool hasLog = false, lastEnteredDoor, exitingLevel;
 		private double lastElapsed, lastRoomElapsed;
 
 		public SplitterComponent(LiveSplitState state) {
@@ -62,11 +62,11 @@ namespace LiveSplit.EscapeGoat2 {
 
 				if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
 					bool enteredDoor = mem.EnteredDoor();
-					bool invulnerable = mem.GoatInvulnerable();
+					int extraCount = mem.OrbCount() + mem.SecretRoomCount();
 
 					if (currentSplit + 1 < Model.CurrentState.Run.Count) {
 						if (!exitingLevel) {
-							exitingLevel = (enteredDoor && enteredDoor != lastEnteredDoor) || (invulnerable && invulnerable != lastInvulnerable);
+							exitingLevel = (enteredDoor && !lastEnteredDoor) || extraCount > lastExtraCount;
 						} else if (elapsedCounter < 3) {
 							if (elapsed == lastElapsed) {
 								elapsedCounter++;
@@ -76,11 +76,11 @@ namespace LiveSplit.EscapeGoat2 {
 						}
 						shouldSplit = elapsedCounter >= 3;
 					} else {
-						shouldSplit = enteredDoor && enteredDoor != lastEnteredDoor;
+						shouldSplit = enteredDoor && !lastEnteredDoor;
 					}
 
 					lastEnteredDoor = enteredDoor;
-					lastInvulnerable = invulnerable;
+					lastExtraCount = extraCount;
 				}
 
 				if (elapsed > 0 || lastElapsed == elapsed) {
@@ -141,6 +141,8 @@ namespace LiveSplit.EscapeGoat2 {
 						case "TitleFadeTime": curr = mem.TitleTextFadeTime().ToString(); break;
 						case "EnteredDoor": curr = mem.EnteredDoor().ToString(); break;
 						case "Invulnerable": curr = mem.GoatInvulnerable().ToString(); break;
+						case "OrbCount": curr = mem.OrbCount().ToString(); break;
+						case "SecretRooms": curr = mem.SecretRoomCount().ToString(); break;
 						default: curr = string.Empty; break;
 					}
 
