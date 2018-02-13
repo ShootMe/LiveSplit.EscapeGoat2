@@ -19,7 +19,8 @@ namespace LiveSplit.EscapeGoat2 {
 		private SplitterMemory mem;
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount;
 		private bool hasLog = false, lastEnteredDoor, exitingLevel;
-		private double lastElapsed, lastRoomElapsed;
+		private double lastElapsed;
+		private MapPosition lastPosition;
 
 		public SplitterComponent(LiveSplitState state) {
 			mem = new SplitterMemory();
@@ -58,15 +59,15 @@ namespace LiveSplit.EscapeGoat2 {
 				shouldSplit = mem.TitleShown() && mem.TitleTextFadeTime() > 0;
 			} else {
 				double elapsed = mem.ElapsedTime();
-				double roomElapsed = mem.RoomElapsedTime();
 
 				if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
 					bool enteredDoor = mem.EnteredDoor();
 					int extraCount = mem.OrbCount() + mem.SecretRoomCount();
+					MapPosition position = mem.CurrentPosition();
 
 					if (currentSplit + 1 < Model.CurrentState.Run.Count) {
 						if (!exitingLevel) {
-							exitingLevel = (enteredDoor && !lastEnteredDoor) || extraCount > lastExtraCount;
+							exitingLevel = elapsed > 0 && ((position.X >= 0 && position != lastPosition) || extraCount == lastExtraCount + 1);
 						} else if (elapsedCounter < 3) {
 							if (elapsed == lastElapsed) {
 								elapsedCounter++;
@@ -81,6 +82,9 @@ namespace LiveSplit.EscapeGoat2 {
 
 					lastEnteredDoor = enteredDoor;
 					lastExtraCount = extraCount;
+					if (position.X >= 0) {
+						lastPosition = position;
+					}
 				}
 
 				if (elapsed > 0 || lastElapsed == elapsed) {
@@ -97,7 +101,6 @@ namespace LiveSplit.EscapeGoat2 {
 				Model.CurrentState.IsGameTimePaused = Model.CurrentState.CurrentPhase != TimerPhase.Running || lastElapsed == elapsed;
 
 				lastElapsed = elapsed;
-				lastRoomElapsed = roomElapsed;
 			}
 
 			HandleSplit(shouldSplit, shouldReset);
@@ -172,7 +175,7 @@ namespace LiveSplit.EscapeGoat2 {
 			currentSplit = -1;
 			lastElapsed = 0;
 			lastEnteredDoor = false;
-			lastRoomElapsed = 0;
+			lastExtraCount = 0;
 			exitingLevel = false;
 			elapsedCounter = 0;
 			Model.CurrentState.IsGameTimePaused = true;
@@ -186,6 +189,9 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		public void OnStart(object sender, EventArgs e) {
 			currentSplit = 0;
+			lastEnteredDoor = mem.EnteredDoor();
+			lastExtraCount = mem.OrbCount() + mem.SecretRoomCount();
+			lastPosition = mem.CurrentPosition();
 			Model.CurrentState.IsGameTimePaused = true;
 			WriteLog("---------New Game " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3) + "-------------------------");
 		}
