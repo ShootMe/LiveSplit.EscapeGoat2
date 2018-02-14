@@ -18,7 +18,7 @@ namespace LiveSplit.EscapeGoat2 {
 		private Dictionary<string, string> currentValues = new Dictionary<string, string>();
 		private SplitterMemory mem;
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount;
-		private bool hasLog = false, lastEnteredDoor, exitingLevel;
+		private bool hasLog, lastEnteredDoor, exitingLevel, ignoreMapChange;
 		private double lastElapsed;
 		private MapPosition lastPosition;
 
@@ -67,7 +67,18 @@ namespace LiveSplit.EscapeGoat2 {
 
 					if (currentSplit + 1 < Model.CurrentState.Run.Count) {
 						if (!exitingLevel) {
-							exitingLevel = elapsed > 0 && ((position.X >= 0 && position != lastPosition) || extraCount == lastExtraCount + 1);
+							if (elapsed > 0) {
+								if (extraCount == lastExtraCount + 1) {
+									ignoreMapChange = true;
+									exitingLevel = true;
+								} else if (position.X >= 0 && position != lastPosition) {
+									if (ignoreMapChange) {
+										ignoreMapChange = false;
+									} else {
+										exitingLevel = true;
+									}
+								}
+							}
 						} else if (elapsedCounter < 3) {
 							if (elapsed == lastElapsed) {
 								elapsedCounter++;
@@ -173,11 +184,6 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		public void OnReset(object sender, TimerPhase e) {
 			currentSplit = -1;
-			lastElapsed = 0;
-			lastEnteredDoor = false;
-			lastExtraCount = 0;
-			exitingLevel = false;
-			elapsedCounter = 0;
 			Model.CurrentState.IsGameTimePaused = true;
 			WriteLog("---------Reset----------------------------------");
 		}
@@ -189,9 +195,13 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		public void OnStart(object sender, EventArgs e) {
 			currentSplit = 0;
+			lastElapsed = 0;
 			lastEnteredDoor = mem.EnteredDoor();
 			lastExtraCount = mem.OrbCount() + mem.SecretRoomCount();
 			lastPosition = mem.CurrentPosition();
+			ignoreMapChange = false;
+			exitingLevel = false;
+			elapsedCounter = 0;
 			Model.CurrentState.IsGameTimePaused = true;
 			WriteLog("---------New Game " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3) + "-------------------------");
 		}
