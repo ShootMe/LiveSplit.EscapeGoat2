@@ -18,9 +18,8 @@ namespace LiveSplit.EscapeGoat2 {
 		private Dictionary<string, string> currentValues = new Dictionary<string, string>();
 		private SplitterMemory mem;
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount;
-		private bool hasLog, lastEnteredDoor, exitingLevel, ignoreMapChange;
+		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
-		private MapPosition lastPosition;
 
 		public SplitterComponent(LiveSplitState state) {
 			mem = new SplitterMemory();
@@ -63,22 +62,10 @@ namespace LiveSplit.EscapeGoat2 {
 				if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
 					bool enteredDoor = mem.EnteredDoor();
 					int extraCount = mem.OrbCount() + mem.SecretRoomCount();
-					MapPosition position = mem.CurrentPosition();
 
 					if (currentSplit + 1 < Model.CurrentState.Run.Count) {
 						if (!exitingLevel) {
-							if (elapsed > 0) {
-								if (extraCount == lastExtraCount + 1) {
-									ignoreMapChange = true;
-									exitingLevel = true;
-								} else if (position.X >= 0 && position != lastPosition) {
-									if (ignoreMapChange) {
-										ignoreMapChange = false;
-									} else {
-										exitingLevel = true;
-									}
-								}
-							}
+							exitingLevel = elapsed > 0 && ((enteredDoor && !lastEnteredDoor) || extraCount == lastExtraCount + 1);
 						} else if (elapsedCounter < 3) {
 							if (elapsed == lastElapsed) {
 								elapsedCounter++;
@@ -93,9 +80,6 @@ namespace LiveSplit.EscapeGoat2 {
 
 					lastEnteredDoor = enteredDoor;
 					lastExtraCount = extraCount;
-					if (position.X >= 0) {
-						lastPosition = position;
-					}
 				}
 
 				if (elapsed > 0 || lastElapsed == elapsed) {
@@ -198,8 +182,6 @@ namespace LiveSplit.EscapeGoat2 {
 			lastElapsed = 0;
 			lastEnteredDoor = mem.EnteredDoor();
 			lastExtraCount = mem.OrbCount() + mem.SecretRoomCount();
-			lastPosition = mem.CurrentPosition();
-			ignoreMapChange = false;
 			exitingLevel = false;
 			elapsedCounter = 0;
 			Model.CurrentState.IsGameTimePaused = true;
