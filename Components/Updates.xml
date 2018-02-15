@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <updates>
+	<update version="1.0.4">
+		<files>
+			<file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>
+		</files>
+		<changelog>
+			<change> Removed auto reset </change>
+		</changelog>
+	</update>
 	<update version="1.0.3">
 		<files>
 			<file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>

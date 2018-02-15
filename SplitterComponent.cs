@@ -52,7 +52,6 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		private void HandleSplits() {
 			bool shouldSplit = false;
-			bool shouldReset = false;
 
 			if (currentSplit == -1) {
 				shouldSplit = mem.TitleShown() && mem.TitleTextFadeTime() > 0;
@@ -89,8 +88,6 @@ namespace LiveSplit.EscapeGoat2 {
 						ISegment segment = Model.CurrentState.Run[currentSplit - 1];
 						segment.SplitTime = new Time(segment.SplitTime.RealTime, TimeSpan.FromSeconds(elapsed));
 					}
-				} else if (lastElapsed > 0) {
-					shouldReset = true;
 				}
 
 				Model.CurrentState.IsGameTimePaused = Model.CurrentState.CurrentPhase != TimerPhase.Running || lastElapsed == elapsed;
@@ -98,7 +95,7 @@ namespace LiveSplit.EscapeGoat2 {
 				lastElapsed = elapsed;
 			}
 
-			HandleSplit(shouldSplit, shouldReset);
+			HandleSplit(shouldSplit, false);
 		}
 		private void HandleSplit(bool shouldSplit, bool shouldReset = false) {
 			if (shouldReset) {
