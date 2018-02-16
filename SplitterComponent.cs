@@ -83,7 +83,9 @@ namespace LiveSplit.EscapeGoat2 {
 
 				if (elapsed > 0 || lastElapsed == elapsed) {
 					if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
-						Model.CurrentState.SetGameTime(TimeSpan.FromSeconds(elapsed));
+						if (elapsed >= Model.CurrentState.CurrentTime.GameTime.GetValueOrDefault(TimeSpan.FromSeconds(0)).TotalSeconds - 1) {
+							Model.CurrentState.SetGameTime(TimeSpan.FromSeconds(elapsed));
+						}
 					} else if (lastElapsed != elapsed && currentSplit == Model.CurrentState.Run.Count) {
 						ISegment segment = Model.CurrentState.Run[currentSplit - 1];
 						segment.SplitTime = new Time(segment.SplitTime.RealTime, TimeSpan.FromSeconds(elapsed));
