@@ -17,7 +17,7 @@ namespace LiveSplit.EscapeGoat2 {
 		private static string[] keys = { "CurrentSplit", "Pointer", "MapPos", "Room", "Elapsed", "RoomElapsed", "TotalDeaths", "TotalBonks", "GameBeaten", "TitleShown", "TitleFadeTime", "EnteredDoor", "Invulnerable", "OrbCount", "SecretRooms" };
 		private Dictionary<string, string> currentValues = new Dictionary<string, string>();
 		private SplitterMemory mem;
-		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount;
+		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount, lastDeathCount, deathTimer;
 		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
 
@@ -57,8 +57,17 @@ namespace LiveSplit.EscapeGoat2 {
 				shouldSplit = mem.TitleShown() && mem.TitleTextFadeTime() > 0;
 			} else {
 				double elapsed = mem.ElapsedTime();
+				int deathCount = mem.TotalDeaths();
 
-				if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
+				if (deathCount > lastDeathCount) {
+					deathTimer = 150;
+					exitingLevel = false;
+					elapsedCounter = 0;
+				} else if (deathTimer > 0) {
+					deathTimer--;
+				}
+
+				if (Model.CurrentState.CurrentPhase == TimerPhase.Running && deathTimer <= 0) {
 					bool enteredDoor = mem.EnteredDoor();
 					int extraCount = mem.OrbCount() + mem.SecretRoomCount();
 
@@ -95,6 +104,7 @@ namespace LiveSplit.EscapeGoat2 {
 				Model.CurrentState.IsGameTimePaused = Model.CurrentState.CurrentPhase != TimerPhase.Running || lastElapsed == elapsed;
 
 				lastElapsed = elapsed;
+				lastDeathCount = deathCount;
 			}
 
 			HandleSplit(shouldSplit, false);
