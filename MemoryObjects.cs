@@ -1,4 +1,22 @@
 ﻿namespace LiveSplit.EscapeGoat2 {
+	public enum LogObject {
+		CurrentSplit,
+		Pointer,
+		MapPos,
+		Room,
+		Elapsed,
+		RoomElapsed,
+		TotalDeaths,
+		TotalBonks,
+		GameBeaten,
+		TitleShown,
+		TitleFadeTime,
+		EnteredDoor,
+		Invulnerable,
+		OrbCount,
+		SecretRooms,
+		Paused
+	}
 	public class MapPosition {
 		public int X { get; set; }
 		public int Y { get; set; }

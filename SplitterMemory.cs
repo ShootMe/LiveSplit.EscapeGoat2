@@ -15,6 +15,10 @@ namespace LiveSplit.EscapeGoat2 {
 		public string SceneManagerPointer() {
 			return SceneManager.GetPointer(Program).ToString("X");
 		}
+		public bool IsPaused() {
+			//SceneManager.ActionSceneInstance._suspendPlayerInput
+			return SceneManager.Read<bool>(Program, 0x4, 0x94);
+		}
 		public MapPosition CurrentPosition() {
 			//SceneManager.ActionSceneInstance.GameState._currentPosition._x
 			int x = SceneManager.Read<int>(Program, 0x4, 0x84, 0x58);
