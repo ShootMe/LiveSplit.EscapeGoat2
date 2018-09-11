@@ -16,6 +16,7 @@ namespace LiveSplit.EscapeGoat2 {
 		private static string LOGFILE = "_EscapeGoat.txt";
 		private Dictionary<LogObject, string> currentValues = new Dictionary<LogObject, string>();
 		private SplitterMemory mem;
+		private TextComponent deathComponent;
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount, lastDeathCount, deathTimer;
 		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
@@ -165,7 +166,26 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 
 		public void Update(IInvalidator invalidator, LiveSplitState lvstate, float width, float height, LayoutMode mode) {
+			if ((lastLogCheck & 63) == 0) {
+				IList<ILayoutComponent> components = lvstate.Layout.LayoutComponents;
+				deathComponent = null;
+				for (int i = components.Count - 1; i >= 0; i--) {
+					ILayoutComponent component = components[i];
+					if (component.Component is TextComponent) {
+						TextComponent text = (TextComponent)component.Component;
+						if (text.Settings.Text1.IndexOf("Death", StringComparison.OrdinalIgnoreCase) >= 0) {
+							deathComponent = text;
+							break;
+						}
+					}
+				}
+			}
+
 			GetValues();
+
+			if (deathComponent != null) {
+				deathComponent.Settings.Text2 = mem.TotalDeaths().ToString();
+			}
 		}
 		public void OnReset(object sender, TimerPhase e) {
 			currentSplit = -1;
