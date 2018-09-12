@@ -17,12 +17,14 @@ namespace LiveSplit.EscapeGoat2 {
 		private Dictionary<LogObject, string> currentValues = new Dictionary<LogObject, string>();
 		private SplitterMemory mem;
 		private TextComponent deathComponent;
+		private SplitterSettings settings;
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount, lastDeathCount, deathTimer;
 		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
 
 		public SplitterComponent(LiveSplitState state) {
 			mem = new SplitterMemory();
+			settings = new SplitterSettings();
 			foreach (LogObject key in Enum.GetValues(typeof(LogObject))) {
 				currentValues[key] = "";
 			}
@@ -81,7 +83,7 @@ namespace LiveSplit.EscapeGoat2 {
 								elapsedCounter = 0;
 							}
 						}
-						shouldSplit = elapsedCounter >= 3;
+						shouldSplit = settings.SplitOnEnterPickup ? exitingLevel : elapsedCounter >= 3;
 					} else {
 						shouldSplit = enteredDoor && !lastEnteredDoor;
 					}
@@ -238,9 +240,9 @@ namespace LiveSplit.EscapeGoat2 {
 			}
 		}
 
-		public Control GetSettingsControl(LayoutMode mode) { return null; }
-		public void SetSettings(XmlNode document) { }
-		public XmlNode GetSettings(XmlDocument document) { return document.CreateElement("Settings"); }
+		public Control GetSettingsControl(LayoutMode mode) { return settings; }
+		public void SetSettings(XmlNode document) { settings.SetSettings(document); }
+		public XmlNode GetSettings(XmlDocument document) { return settings.UpdateSettings(document); }
 		public void DrawHorizontal(Graphics g, LiveSplitState state, float height, Region clipRegion) { }
 		public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion) { }
 		public float HorizontalWidth { get { return 0; } }
