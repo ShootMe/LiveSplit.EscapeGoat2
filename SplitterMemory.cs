@@ -69,11 +69,11 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		public double RoomElapsedTime() {
 			//SceneManager.ActionSceneInstance.RoomInstance.RoomElapsedTime
-			return (double)(SceneManager.Read<long>(Program, 0x4, 0x60, 0xcc) / 100000) * (double)0.01;
+			return (double)SceneManager.Read<long>(Program, 0x4, 0x60, 0xcc) / (double)10000000;
 		}
 		public double ElapsedTime() {
 			//SceneManager.ActionSceneInstance.GameState._totalTime
-			return (double)(SceneManager.Read<long>(Program, 0x4, 0x84, 0x3c) / 100000) * (double)0.01;
+			return (double)SceneManager.Read<long>(Program, 0x4, 0x84, 0x3c) / (double)10000000;
 		}
 		public int TotalDeaths() {
 			//SceneManager.ActionSceneInstance.GameState.TotalDeathCount

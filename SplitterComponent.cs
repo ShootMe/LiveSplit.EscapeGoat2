@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml;
+using System.Threading;
 namespace LiveSplit.EscapeGoat2 {
 	public class SplitterComponent : IComponent {
 		public string ComponentName { get { return "Escape Goat 2 Autosplitter"; } }
@@ -21,6 +22,7 @@ namespace LiveSplit.EscapeGoat2 {
 		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount, lastDeathCount, deathTimer;
 		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
+		private Thread goatLoop;
 
 		public SplitterComponent(LiveSplitState state) {
 			mem = new SplitterMemory();
@@ -41,8 +43,22 @@ namespace LiveSplit.EscapeGoat2 {
 				state.OnUndoSplit += OnUndoSplit;
 				state.OnSkipSplit += OnSkipSplit;
 			}
+
+			goatLoop = new Thread(UpdateLoop);
+			goatLoop.IsBackground = true;
+			goatLoop.Start();
 		}
 
+		private void UpdateLoop() {
+			while (goatLoop != null) {
+				try {
+					GetValues();
+				} catch (Exception ex) {
+					WriteLog(ex.ToString());
+				}
+				Thread.Sleep(8);
+			}
+		}
 		public void GetValues() {
 			if (!mem.HookProcess()) { return; }
 
@@ -84,6 +100,9 @@ namespace LiveSplit.EscapeGoat2 {
 							}
 						}
 						shouldSplit = settings.SplitOnEnterPickup ? exitingLevel : elapsedCounter >= 3;
+						if (shouldSplit) {
+							deathTimer = 60;
+						}
 					} else {
 						shouldSplit = enteredDoor && !lastEnteredDoor;
 					}
@@ -183,8 +202,6 @@ namespace LiveSplit.EscapeGoat2 {
 				}
 			}
 
-			GetValues();
-
 			if (deathComponent != null) {
 				deathComponent.Settings.Text2 = mem.TotalDeaths().ToString();
 			}
@@ -254,6 +271,9 @@ namespace LiveSplit.EscapeGoat2 {
 		public float PaddingTop { get { return 0; } }
 		public float VerticalHeight { get { return 0; } }
 		public void Dispose() {
+			if (goatLoop != null) {
+				goatLoop = null;
+			}
 			if (Model != null) {
 				Model.CurrentState.OnReset -= OnReset;
 				Model.CurrentState.OnPause -= OnPause;
