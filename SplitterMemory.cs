@@ -63,9 +63,13 @@ namespace LiveSplit.EscapeGoat2 {
 			//SceneManager.TitleScreenInstance._titleTextFadeTimer
 			return SceneManager.Read<int>(Program, 0xc, 0x8c);
 		}
+		public bool HasRoomInstance() {
+			//SceneManager.ActionSceneInstance.RoomInstance
+			return SceneManager.Read<uint>(Program, 0x4, 0x60) != 0;
+		}
 		public bool EnteredDoor() {
 			//SceneManager.ActionSceneInstance.RoomInstance.StopCountingElapsedTime
-			return SceneManager.Read<bool>(Program, 0x4, 0x60, 0xca);
+			return HasRoomInstance() && SceneManager.Read<bool>(Program, 0x4, 0x60, 0xca);
 		}
 		public double RoomElapsedTime() {
 			//SceneManager.ActionSceneInstance.RoomInstance.RoomElapsedTime

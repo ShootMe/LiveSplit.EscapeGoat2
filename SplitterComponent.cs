@@ -19,7 +19,7 @@ namespace LiveSplit.EscapeGoat2 {
 		private SplitterMemory mem;
 		private TextComponent deathComponent;
 		private SplitterSettings settings;
-		private int currentSplit = -1, lastLogCheck, elapsedCounter, lastExtraCount, lastDeathCount, deathTimer;
+		private int currentSplit = -1, lastLogCheck, lastExtraCount, lastDeathCount, deathTimer;
 		private bool hasLog, lastEnteredDoor, exitingLevel;
 		private double lastElapsed;
 		private Thread goatLoop;
@@ -42,11 +42,11 @@ namespace LiveSplit.EscapeGoat2 {
 				state.OnSplit += OnSplit;
 				state.OnUndoSplit += OnUndoSplit;
 				state.OnSkipSplit += OnSkipSplit;
-			}
 
-			goatLoop = new Thread(UpdateLoop);
-			goatLoop.IsBackground = true;
-			goatLoop.Start();
+				goatLoop = new Thread(UpdateLoop);
+				goatLoop.IsBackground = true;
+				goatLoop.Start();
+			}
 		}
 
 		private void UpdateLoop() {
@@ -78,42 +78,42 @@ namespace LiveSplit.EscapeGoat2 {
 				int deathCount = mem.TotalDeaths();
 
 				if (deathCount > lastDeathCount) {
-					deathTimer = 150;
+					deathTimer = 280;
 					exitingLevel = false;
-					elapsedCounter = 0;
 				} else if (deathTimer > 0) {
 					deathTimer--;
 				}
 
-				if (Model.CurrentState.CurrentPhase == TimerPhase.Running && deathTimer <= 0) {
-					bool enteredDoor = mem.EnteredDoor();
-					int extraCount = mem.OrbCount() + mem.SecretRoomCount();
+				bool enteredDoor = mem.EnteredDoor();
+				int extraCount = mem.OrbCount() + mem.SecretRoomCount();
 
+				if (Model.CurrentState.CurrentPhase == TimerPhase.Running && deathTimer <= 0) {
 					if (currentSplit + 1 < Model.CurrentState.Run.Count) {
 						if (!exitingLevel) {
 							exitingLevel = elapsed > 0 && ((enteredDoor && !lastEnteredDoor) || extraCount == lastExtraCount + 1);
-						} else if (elapsedCounter < 3) {
-							if (elapsed == lastElapsed && !mem.IsPaused()) {
-								elapsedCounter++;
-							} else {
-								elapsedCounter = 0;
+							if (exitingLevel) {
+								Thread.Sleep(3);
+								enteredDoor = mem.EnteredDoor();
+								extraCount = mem.OrbCount() + mem.SecretRoomCount();
+								exitingLevel = elapsed > 0 && ((enteredDoor && !lastEnteredDoor) || extraCount == lastExtraCount + 1);
 							}
 						}
-						shouldSplit = settings.SplitOnEnterPickup ? exitingLevel : elapsedCounter >= 3;
+						shouldSplit = exitingLevel && (settings.SplitOnEnterPickup ? true : !mem.HasRoomInstance());
 						if (shouldSplit) {
-							deathTimer = 60;
+							deathTimer = 360;
+							exitingLevel = false;
 						}
 					} else {
 						shouldSplit = enteredDoor && !lastEnteredDoor;
 					}
-
-					lastEnteredDoor = enteredDoor;
-					lastExtraCount = extraCount;
 				}
+
+				lastEnteredDoor = enteredDoor;
+				lastExtraCount = extraCount;
 
 				if (elapsed > 0 || lastElapsed == elapsed) {
 					if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
-						if (Math.Abs(elapsed - Model.CurrentState.CurrentTime.GameTime.GetValueOrDefault(TimeSpan.FromSeconds(0)).TotalSeconds) <= 1) {
+						if (Math.Abs(elapsed - Model.CurrentState.CurrentTime.GameTime.GetValueOrDefault(TimeSpan.FromSeconds(0)).TotalSeconds) <= 1 || (deathTimer <= 0 && mem.HasRoomInstance())) {
 							Model.CurrentState.SetGameTime(TimeSpan.FromSeconds(elapsed));
 						}
 					} else if (lastElapsed != elapsed && currentSplit == Model.CurrentState.Run.Count) {
@@ -172,6 +172,7 @@ namespace LiveSplit.EscapeGoat2 {
 						case LogObject.OrbCount: curr = mem.OrbCount().ToString(); break;
 						case LogObject.SecretRooms: curr = mem.SecretRoomCount().ToString(); break;
 						case LogObject.Paused: curr = mem.IsPaused().ToString(); break;
+						case LogObject.RoomInstance: curr = mem.HasRoomInstance().ToString(); break;
 						default: curr = string.Empty; break;
 					}
 
@@ -208,7 +209,6 @@ namespace LiveSplit.EscapeGoat2 {
 		}
 		public void OnReset(object sender, TimerPhase e) {
 			currentSplit = -1;
-			Model.CurrentState.IsGameTimePaused = true;
 			WriteLog("---------Reset----------------------------------");
 		}
 		public void OnResume(object sender, EventArgs e) {
@@ -223,36 +223,35 @@ namespace LiveSplit.EscapeGoat2 {
 			lastEnteredDoor = mem.EnteredDoor();
 			lastExtraCount = mem.OrbCount() + mem.SecretRoomCount();
 			exitingLevel = false;
-			elapsedCounter = 0;
+			Model.CurrentState.SetGameTime(TimeSpan.Zero);
 			Model.CurrentState.IsGameTimePaused = true;
 			WriteLog("---------New Game " + Assembly.GetExecutingAssembly().GetName().Version.ToString(3) + "-------------------------");
 		}
 		public void OnUndoSplit(object sender, EventArgs e) {
 			currentSplit--;
 			exitingLevel = false;
-			elapsedCounter = 0;
 			WriteLog("---------Undo-----------------------------------");
 		}
 		public void OnSkipSplit(object sender, EventArgs e) {
 			currentSplit++;
 			exitingLevel = false;
-			elapsedCounter = 0;
 			WriteLog("---------Skip-----------------------------------");
 		}
 		public void OnSplit(object sender, EventArgs e) {
 			currentSplit++;
 			exitingLevel = false;
-			elapsedCounter = 0;
 			WriteLog("---------Split-----------------------------------");
 		}
 		private void WriteLog(string data) {
-			if (hasLog || !Console.IsOutputRedirected) {
-				if (Console.IsOutputRedirected) {
-					using (StreamWriter wr = new StreamWriter(LOGFILE, true)) {
-						wr.WriteLine(data);
+			lock (LOGFILE) {
+				if (hasLog || !Console.IsOutputRedirected) {
+					if (Console.IsOutputRedirected) {
+						using (StreamWriter wr = new StreamWriter(LOGFILE, true)) {
+							wr.WriteLine(data);
+						}
+					} else {
+						Console.WriteLine(data);
 					}
-				} else {
-					Console.WriteLine(data);
 				}
 			}
 		}

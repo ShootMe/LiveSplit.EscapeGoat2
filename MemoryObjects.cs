@@ -15,7 +15,8 @@
 		Invulnerable,
 		OrbCount,
 		SecretRooms,
-		Paused
+		Paused,
+		RoomInstance
 	}
 	public class MapPosition {
 		public int X { get; set; }
