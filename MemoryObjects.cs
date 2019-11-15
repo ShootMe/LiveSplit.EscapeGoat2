@@ -7,8 +7,6 @@
 		Elapsed,
 		RoomElapsed,
 		TotalDeaths,
-		TotalBonks,
-		GameBeaten,
 		TitleShown,
 		TitleFadeTime,
 		EnteredDoor,
@@ -18,7 +16,24 @@
 		Paused,
 		RoomInstance
 	}
-	public class MapPosition {
+    public enum ActionSceneStates {
+        Uninitialized,
+        ShowingIntroText,
+        CheckForRegionMovement,
+        FadingCurrentRegionOut,
+        ExitingCurrentRoom,
+        CheckForRoomMovement,
+        RegionLoadedDuringRegionTransition,
+        RoomLoadedWaitingOnBlack,
+        FadingRoomIn,
+        Action,
+        ReturningToHub,
+        PlayerDead,
+        QuitGameRequested,
+        Quitting,
+        BeatenGame
+    }
+    public class MapPosition {
 		public int X { get; set; }
 		public int Y { get; set; }
 		public override string ToString() {
