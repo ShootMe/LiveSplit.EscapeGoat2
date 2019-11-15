@@ -4,8 +4,8 @@ using System;
 using System.Reflection;
 namespace LiveSplit.EscapeGoat2 {
     public class SplitterFactory : IComponentFactory {
-        public string ComponentName { get { return "Escape Goat 2 Autosplitter v" + this.Version.ToString(); } }
-        public string Description { get { return "Autosplitter for Escape Goat 2"; } }
+        public string ComponentName { get { return "Escape Goat 1/2 Autosplitter v" + this.Version.ToString(); } }
+        public string Description { get { return "Autosplitter for Escape Goat 1/2"; } }
         public ComponentCategory Category { get { return ComponentCategory.Control; } }
         public IComponent Create(LiveSplitState state) { return new SplitterComponent(state); }
         public string UpdateName { get { return this.ComponentName; } }

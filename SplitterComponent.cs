@@ -6,12 +6,17 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
-using System.Threading;
 namespace LiveSplit.EscapeGoat2 {
     public class SplitterComponent : IComponent {
-        public string ComponentName { get { return "Escape Goat 2 Autosplitter"; } }
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        private static extern short GetAsyncKeyState(Keys vkey);
+        public string ComponentName { get { return "Escape Goat 1/2 Autosplitter"; } }
         public TimerModel Model { get; set; }
         public IDictionary<string, Action> ContextMenuControls { get { return null; } }
         private static string LOGFILE = "_EscapeGoat.txt";
@@ -20,7 +25,7 @@ namespace LiveSplit.EscapeGoat2 {
         private TextComponent deathComponent;
         private SplitterSettings settings;
         private int currentSplit = -1, lastLogCheck, lastExtraCount, lastDeathCount, deathTimer;
-        private bool hasLog, lastEnteredDoor, exitingLevel;
+        private bool hasLog, lastEnteredDoor, exitingLevel, stillHolding;
         private double lastElapsed;
         private MapPosition lastMapPosition = new MapPosition() { X = 10, Y = 0 };
         private Thread goatLoop;
@@ -50,6 +55,9 @@ namespace LiveSplit.EscapeGoat2 {
             }
         }
 
+        private static bool IsKeyDown(Keys key) {
+            return (GetAsyncKeyState(key) >> 15 & 1) == 1;
+        }
         private void UpdateLoop() {
             while (goatLoop != null) {
                 try {
@@ -65,6 +73,22 @@ namespace LiveSplit.EscapeGoat2 {
 
             if (Model != null) {
                 HandleSplits();
+            }
+
+            if ((Model == null || Model.CurrentState.CurrentPhase == TimerPhase.NotRunning) && mem.Program.MainWindowHandle == GetForegroundWindow()) {
+                if (IsKeyDown(Keys.ControlKey) && IsKeyDown(Keys.A)) {
+                    if (!stillHolding) {
+                        mem.MoveToPreviousLevel();
+                        stillHolding = true;
+                    }
+                } else if (IsKeyDown(Keys.ControlKey) && IsKeyDown(Keys.D)) {
+                    if (!stillHolding) {
+                        mem.MoveToNextLevel();
+                        stillHolding = true;
+                    }
+                } else {
+                    stillHolding = false;
+                }
             }
 
             LogValues();

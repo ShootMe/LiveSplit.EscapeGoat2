@@ -151,6 +151,24 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG1.Read<int>(Program, -0xc, 0x80, 0x18);
             }
         }
+        public void MoveToPreviousLevel() {
+            if (!IsEG2) {
+                //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
+                int pos = SceneManagerEG1.Read<int>(Program, -0xc, 0x90, 0x8);
+                if (pos > 0) {
+                    //SceneManager.ActionSceneInstance._nextLocation.RegionPosition
+                    SceneManagerEG1.Write<int>(Program, pos - 1, -0xc, 0x94, 0x8);
+                }
+            }
+        }
+        public void MoveToNextLevel() {
+            if (!IsEG2) {
+                //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
+                int pos = SceneManagerEG1.Read<int>(Program, -0xc, 0x90, 0x8);
+                //SceneManager.ActionSceneInstance._nextLocation.RegionPosition
+                SceneManagerEG1.Write<int>(Program, pos + 1, -0xc, 0x94, 0x8);
+            }
+        }
         public bool HookProcess() {
             IsHooked = Program != null && !Program.HasExited;
             if (!IsHooked && DateTime.Now > lastHooked.AddSeconds(1)) {
