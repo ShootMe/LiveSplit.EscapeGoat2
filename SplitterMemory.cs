@@ -116,6 +116,15 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG1.Read<uint>(Program, -0xc, 0x74) != 0;
             }
         }
+        public bool RoomActive() {
+            if (IsEG2) {
+                //SceneManager.ActionSceneInstance.RoomInstance
+                return SceneManagerEG2.Read<uint>(Program, 0x4, 0x60) != 0;
+            } else {
+                //SceneManager.ActionSceneInstance.RoomInstance.Enabled
+                return SceneManagerEG1.Read<bool>(Program, -0xc, 0x74, 0x18);
+            }
+        }
         public bool EnteredDoor() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.RoomInstance.StopCountingElapsedTime

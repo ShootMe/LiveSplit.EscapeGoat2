@@ -22,11 +22,12 @@ namespace LiveSplit.EscapeGoat2 {
         private static string LOGFILE = "_EscapeGoat.txt";
         private Dictionary<LogObject, string> currentValues = new Dictionary<LogObject, string>();
         private SplitterMemory mem;
-        private TextComponent deathComponent;
+        private TextComponent deathComponent, roomComponent;
         private SplitterSettings settings;
         private int currentSplit = -1, lastLogCheck, lastExtraCount, lastDeathCount, deathTimer;
-        private bool hasLog, lastEnteredDoor, exitingLevel, stillHolding;
-        private double lastElapsed;
+        private bool hasLog, lastEnteredDoor, exitingLevel, stillHolding, lastRoomActive;
+        private double lastElapsed, roomTimerStart;
+        private string roomTimer = "0.000", lastRoomTimer = "0.000";
         private MapPosition lastMapPosition = new MapPosition() { X = 10, Y = 0 };
         private Thread goatLoop;
 
@@ -96,10 +97,21 @@ namespace LiveSplit.EscapeGoat2 {
         private void HandleSplits() {
             bool shouldSplit = false;
 
+            double elapsed = mem.ElapsedTime();
+            bool roomActive = mem.RoomActive();
+            if (roomActive) {
+                if (!lastRoomActive && (elapsed - roomTimerStart) > 1) {
+                    lastRoomTimer = roomTimer;
+                    roomTimer = "0.000";
+                    roomTimerStart = elapsed;
+                }
+                roomTimer = (elapsed - roomTimerStart).ToString("0.000");
+            }
+            lastRoomActive = roomActive;
+
             if (currentSplit == -1) {
                 shouldSplit = mem.TitleShown() && mem.TitleTextFadeTime() > 0;
             } else {
-                double elapsed = mem.ElapsedTime();
                 int deathCount = mem.TotalDeaths();
 
                 if (deathCount > lastDeathCount) {
@@ -223,6 +235,8 @@ namespace LiveSplit.EscapeGoat2 {
                         TextComponent text = (TextComponent)component.Component;
                         if (text.Settings.Text1.IndexOf("Death", StringComparison.OrdinalIgnoreCase) >= 0) {
                             deathComponent = text;
+                        } else if (text.Settings.Text1.IndexOf("Room", StringComparison.OrdinalIgnoreCase) >= 0) {
+                            roomComponent = text;
                             break;
                         }
                     }
@@ -231,6 +245,9 @@ namespace LiveSplit.EscapeGoat2 {
 
             if (deathComponent != null) {
                 deathComponent.Settings.Text2 = mem.TotalDeaths().ToString();
+            }
+            if (roomComponent != null) {
+                roomComponent.Settings.Text2 = $"{lastRoomTimer}/{roomTimer}";
             }
         }
         public void OnReset(object sender, TimerPhase e) {
