@@ -100,7 +100,7 @@ namespace LiveSplit.EscapeGoat2 {
             double elapsed = mem.ElapsedTime();
             bool roomActive = mem.RoomActive();
             if (roomActive) {
-                if (!lastRoomActive && (elapsed - roomTimerStart) > 1) {
+                if (!lastRoomActive && Math.Abs(elapsed - roomTimerStart) > 0.5) {
                     lastRoomTimer = roomTimer;
                     roomTimer = "0.000";
                     roomTimerStart = elapsed;
@@ -205,7 +205,6 @@ namespace LiveSplit.EscapeGoat2 {
                         case LogObject.Elapsed: curr = mem.ElapsedTime().ToString("0"); break;
                         case LogObject.TotalDeaths: curr = mem.TotalDeaths().ToString(); break;
                         case LogObject.TitleShown: curr = mem.TitleShown().ToString(); break;
-                        case LogObject.TitleFadeTime: curr = mem.TitleTextFadeTime().ToString(); break;
                         case LogObject.EnteredDoor: curr = mem.EnteredDoor().ToString(); break;
                         case LogObject.OrbCount: curr = mem.OrbCount().ToString(); break;
                         case LogObject.SecretRooms: curr = mem.SecretRoomCount().ToString(); break;
