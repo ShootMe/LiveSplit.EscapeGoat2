@@ -27,7 +27,7 @@ namespace LiveSplit.EscapeGoat2 {
         private int currentSplit = -1, lastLogCheck, lastExtraCount, lastDeathCount, deathTimer;
         private bool hasLog, lastEnteredDoor, exitingLevel, stillHolding, lastRoomActive;
         private double lastElapsed, roomTimerStart;
-        private string roomTimer = "0.000", lastRoomTimer = "0.000";
+        private string roomTimer = "0.000";
         private MapPosition lastMapPosition = new MapPosition() { X = 10, Y = 0 };
         private Thread goatLoop;
 
@@ -101,10 +101,9 @@ namespace LiveSplit.EscapeGoat2 {
             bool roomActive = mem.RoomActive();
             if (roomActive) {
                 if (!lastRoomActive && Math.Abs(elapsed - roomTimerStart) > 0.5) {
-                    lastRoomTimer = roomTimer;
-                    roomTimer = "0.000";
                     roomTimerStart = elapsed;
                 }
+            } else if (lastRoomActive) {
                 roomTimer = (elapsed - roomTimerStart).ToString("0.000");
             }
             lastRoomActive = roomActive;
@@ -242,11 +241,13 @@ namespace LiveSplit.EscapeGoat2 {
                 }
             }
 
-            if (deathComponent != null) {
-                deathComponent.Settings.Text2 = mem.TotalDeaths().ToString();
+            string deaths = deathComponent != null ? mem.TotalDeaths().ToString() : string.Empty;
+            if (!string.IsNullOrEmpty(deaths) && deathComponent.Settings.Text2 != deaths) {
+                deathComponent.Settings.Text2 = deaths;
             }
-            if (roomComponent != null) {
-                roomComponent.Settings.Text2 = $"{lastRoomTimer}/{roomTimer}";
+            string timer = $"{roomTimer}";
+            if (roomComponent != null && roomComponent.Settings.Text2 != timer) {
+                roomComponent.Settings.Text2 = timer;
             }
         }
         public void OnReset(object sender, TimerPhase e) {
