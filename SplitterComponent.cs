@@ -103,7 +103,7 @@ namespace LiveSplit.EscapeGoat2 {
                 if (!lastRoomActive && Math.Abs(elapsed - roomTimerStart) > 0.5) {
                     roomTimerStart = elapsed;
                 }
-            } else if (lastRoomActive) {
+            } else if (lastRoomActive && (elapsed - roomTimerStart) > 0.5) {
                 roomTimer = (elapsed - roomTimerStart).ToString("0.000");
             }
             lastRoomActive = roomActive;
@@ -151,7 +151,7 @@ namespace LiveSplit.EscapeGoat2 {
                 lastEnteredDoor = enteredDoor;
                 lastExtraCount = extraCount;
 
-                if (elapsed > 0 || lastElapsed == elapsed) {
+                if (elapsed > 0) {
                     if (Model.CurrentState.CurrentPhase == TimerPhase.Running) {
                         if (Math.Abs(elapsed - Model.CurrentState.CurrentTime.GameTime.GetValueOrDefault(TimeSpan.FromSeconds(0)).TotalSeconds) <= 1 || (deathTimer <= 0 && mem.HasRoomInstance())) {
                             Model.CurrentState.SetGameTime(TimeSpan.FromSeconds(elapsed));
