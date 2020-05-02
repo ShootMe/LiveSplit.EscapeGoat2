@@ -49,10 +49,13 @@ namespace LiveSplit.EscapeGoat2 {
         private void ResetCustomStats() {
             deathTimer = DateTime.MinValue;
             DeathTimeLost = "0.000";
+            lastDeathCount = 0;
             totalDeathTime = 0;
             RoomTimer = "0.000";
             exitingLevel = false;
             lastElapsed = 0;
+            currentElapsed = 0;
+            roomTimerStart = 0;
         }
         private void InitializeSplit() {
             if (CurrentSplit <= TotalSplits) {
@@ -145,15 +148,6 @@ namespace LiveSplit.EscapeGoat2 {
                     bool enteredDoor = Memory.EnteredDoor();
                     int extraCount = Memory.OrbCount() + Memory.SecretRoomCount();
                     exitingLevel = currentElapsed > 0 && ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
-
-                    if (exitingLevel) {
-                        Thread.Sleep(3);
-                        currentRoomActive = Memory.RoomActive();
-                        enteredDoor = Memory.EnteredDoor();
-                        extraCount = Memory.OrbCount() + Memory.SecretRoomCount();
-                        exitingLevel = ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
-                    }
-
                     lastBoolValue = enteredDoor;
                     lastIntValue = extraCount;
                 }
