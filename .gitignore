@@ -2,8 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs
 /bin
-/Components/LiveSplit.EscapeGoat2.exe
+/Components/*.exe
+/.vs
 /obj
-/LiveSplit.EscapeGoat2.csproj.user
+/*.user

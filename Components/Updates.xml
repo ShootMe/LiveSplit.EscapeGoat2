@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <updates>
+    <update version="1.1.7">
+        <files>
+            <file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>
+        </files>
+        <changelog>
+            <change> Updated Death Text component to include time loss </change>
+            <change> Improved autosplitter code base </change>
+        </changelog>
+    </update>
     <update version="1.1.6">
         <files>
             <file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>

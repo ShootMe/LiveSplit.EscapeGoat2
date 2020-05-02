@@ -1,9 +1,9 @@
 # LiveSplit.EscapeGoat2
-Simple autosplitter for the game Escape Goat 2
+Simple autosplitter for the game Escape Goat 1/2
 
 ## Installing
   - Open LiveSplit
-  - Edit your splits and make sure the game is set to Escape Goat 2
+  - Edit your splits and make sure the game is set to Escape Goat / Escape Goat 2
   - Click the Activate autosplitter button
   
 ## Splits
