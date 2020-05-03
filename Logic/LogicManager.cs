@@ -144,7 +144,7 @@ namespace LiveSplit.EscapeGoat2 {
                     lastBoolValue = enteredDoor;
                 }
             } else {
-                if (!exitingLevel) {
+                if (!exitingLevel && date > deathTimer) {
                     bool enteredDoor = Memory.EnteredDoor();
                     int extraCount = Memory.OrbCount() + Memory.SecretRoomCount();
                     exitingLevel = currentElapsed > 0 && ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
