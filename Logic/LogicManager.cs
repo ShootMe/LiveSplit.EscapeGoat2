@@ -74,6 +74,7 @@ namespace LiveSplit.EscapeGoat2 {
         }
         public void Update(int currentSplit, int totalSplits) {
             currentElapsed = Memory.HasGameState() ? Memory.ElapsedTime() : lastElapsed;
+            if (currentElapsed < 0 || currentElapsed > 10000000) { currentElapsed = lastElapsed; }
             TotalSplits = totalSplits;
 
             if (currentSplit != CurrentSplit) {
@@ -136,18 +137,18 @@ namespace LiveSplit.EscapeGoat2 {
             } else if (!Memory.IsEG2) {
                 if (TotalSplits == 10 && !finalSplit) {
                     MapPosition mapPosition = Memory.CurrentPosition();
-                    ShouldSplit = currentElapsed > 0 && mapPosition.X == 10 && lastIntValue != 10;
+                    ShouldSplit = mapPosition.X == 10 && lastIntValue != 10;
                     lastIntValue = mapPosition.X;
                 } else {
                     bool enteredDoor = Memory.EnteredDoor();
-                    ShouldSplit = currentElapsed > 0 && enteredDoor && !lastBoolValue && currentRoomActive;
+                    ShouldSplit = enteredDoor && !lastBoolValue && currentRoomActive;
                     lastBoolValue = enteredDoor;
                 }
             } else {
                 if (!exitingLevel && date > deathTimer) {
                     bool enteredDoor = Memory.EnteredDoor();
                     int extraCount = Memory.OrbCount() + Memory.SecretRoomCount();
-                    exitingLevel = currentElapsed > 0 && ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
+                    exitingLevel = ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
                     lastBoolValue = enteredDoor;
                     lastIntValue = extraCount;
                 }
