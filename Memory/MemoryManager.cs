@@ -26,7 +26,7 @@ namespace LiveSplit.EscapeGoat2 {
         }
         public void PatchSheepRooms(bool enable) {
             if (!sheepRoomPatch.HasValue || enable != sheepRoomPatch.Value) {
-                if (IsSheepObtainedHere.GetPointer(Program) == IntPtr.Zero) { return; }
+                if (!IsEG2 || IsSheepObtainedHere.GetPointer(Program) == IntPtr.Zero) { return; }
 
                 IsSheepObtainedHere.Write<byte>(Program, (byte)(enable ? 0x0 : 0xff));
 
