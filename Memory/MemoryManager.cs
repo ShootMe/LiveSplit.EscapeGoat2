@@ -7,11 +7,13 @@ namespace LiveSplit.EscapeGoat2 {
         private static ProgramPointer SceneManagerEG1 = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.Single, "8B40048B4804FF15????????FF15????????B9????????E8????????8BF88B1D", 0x20));
         //???
         private static ProgramPointer SceneManagerEG2 = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.Single, "558BEC56833D????????00740B81E2FF00000075035E5DC333F683F908734BFF248D", 0x6));
+        private static ProgramPointer IsSheepObtainedHere = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.None, "568B51783A42588D4A588B318B41048BF88B4A1057563909E8????????25??0000005E5FC3", 0x1e));
         public static PointerVersion Version { get; set; } = PointerVersion.All;
         public Process Program { get; set; }
         public bool IsHooked { get; set; }
         public DateTime LastHooked { get; set; }
         public bool IsEG2 { get; set; } = true;
+        private bool? sheepRoomPatch;
 
         public MemoryManager() {
             LastHooked = DateTime.MinValue;
@@ -21,6 +23,15 @@ namespace LiveSplit.EscapeGoat2 {
                 $"EG1: {SceneManagerEG1.GetPointer(Program):X} ",
                 $"EG2: {SceneManagerEG2.GetPointer(Program):X} "
             );
+        }
+        public void PatchSheepRooms(bool enable) {
+            if (!sheepRoomPatch.HasValue || enable != sheepRoomPatch.Value) {
+                if (IsSheepObtainedHere.GetPointer(Program) == IntPtr.Zero) { return; }
+
+                IsSheepObtainedHere.Write<byte>(Program, (byte)(enable ? 0x0 : 0xff));
+
+                sheepRoomPatch = enable;
+            }
         }
         public bool IsPaused() {
             if (IsEG2) {
@@ -188,6 +199,7 @@ namespace LiveSplit.EscapeGoat2 {
                     MemoryReader.Update64Bit(Program);
                     MemoryManager.Version = PointerVersion.All;
                     IsHooked = true;
+                    sheepRoomPatch = null;
                 }
             }
 

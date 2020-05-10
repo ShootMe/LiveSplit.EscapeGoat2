@@ -38,6 +38,9 @@ namespace LiveSplit.EscapeGoat2 {
             AddXmlItem<bool>(document, xmlSettings, "LogInfo", chkLog.Checked);
             Log.EnableLogging = chkLog.Checked;
 
+            AddXmlItem<bool>(document, xmlSettings, "SheepRoomPatch", chkSheepRooms.Checked);
+            Settings.SheepRoomPatch = chkSheepRooms.Checked;
+
             AddXmlItem<bool>(document, xmlSettings, "SplitOnEnterPickup", chkSplitOnEnterPickup.Checked);
             Settings.SplitOnEnterPickup = chkSplitOnEnterPickup.Checked;
 
@@ -47,6 +50,10 @@ namespace LiveSplit.EscapeGoat2 {
             bool logInfo = GetXmlBoolItem(node, ".//LogInfo", false);
             chkLog.Checked = logInfo;
             Log.EnableLogging = logInfo;
+
+            bool sheepRooms = GetXmlBoolItem(node, ".//SheepRoomPatch", false);
+            chkSheepRooms.Checked = sheepRooms;
+            Settings.SheepRoomPatch = sheepRooms;
 
             bool splitPickup = GetXmlBoolItem(node, ".//SplitOnEnterPickup", false);
             chkSplitOnEnterPickup.Checked = splitPickup;

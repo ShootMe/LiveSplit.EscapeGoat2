@@ -83,6 +83,8 @@ namespace LiveSplit.EscapeGoat2 {
                 InitializeSplit();
             }
 
+            Memory.PatchSheepRooms(Running ? false : Settings.SheepRoomPatch);
+
             UpdateDeaths();
             UpdateRoomTimer();
 

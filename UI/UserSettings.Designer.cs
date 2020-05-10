@@ -29,6 +29,7 @@
             this.chkLog = new System.Windows.Forms.CheckBox();
             this.tooltips = new System.Windows.Forms.ToolTip(this.components);
             this.chkSplitOnEnterPickup = new System.Windows.Forms.CheckBox();
+            this.chkSheepRooms = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnLog
@@ -78,10 +79,23 @@
     "d: Split on fadeout of Room";
             this.chkSplitOnEnterPickup.UseVisualStyleBackColor = true;
             // 
+            // chkSheepRooms
+            // 
+            this.chkSheepRooms.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkSheepRooms.AutoSize = true;
+            this.chkSheepRooms.Location = new System.Drawing.Point(3, 10);
+            this.chkSheepRooms.Name = "chkSheepRooms";
+            this.chkSheepRooms.Size = new System.Drawing.Size(119, 17);
+            this.chkSheepRooms.TabIndex = 8;
+            this.chkSheepRooms.Text = "Sheep Room Patch";
+            this.tooltips.SetToolTip(this.chkSheepRooms, "Allow sheep rooms to always be collectible");
+            this.chkSheepRooms.UseVisualStyleBackColor = true;
+            // 
             // UserSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.chkSheepRooms);
             this.Controls.Add(this.chkSplitOnEnterPickup);
             this.Controls.Add(this.chkLog);
             this.Controls.Add(this.btnClearLog);
@@ -101,5 +115,6 @@
         private System.Windows.Forms.CheckBox chkLog;
         private System.Windows.Forms.ToolTip tooltips;
         private System.Windows.Forms.CheckBox chkSplitOnEnterPickup;
+        private System.Windows.Forms.CheckBox chkSheepRooms;
     }
 }
