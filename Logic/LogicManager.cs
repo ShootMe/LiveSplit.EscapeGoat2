@@ -11,7 +11,8 @@ namespace LiveSplit.EscapeGoat2 {
         public MemoryManager Memory { get; private set; }
         public SplitterSettings Settings { get; private set; }
         public string RoomTimer = "0.000", DeathTimeLost = "0.000";
-        private bool lastBoolValue, lastRoomActive, exitingLevel, currentRoomActive;
+        private bool lastBoolValue, exitingLevel;
+        private uint currentRoomState, lastRoomState;
         private int lastIntValue;
         private DateTime splitLate, deathTimer;
         private int TotalSplits, lastDeathCount;
@@ -73,7 +74,8 @@ namespace LiveSplit.EscapeGoat2 {
             return hooked;
         }
         public void Update(int currentSplit, int totalSplits) {
-            currentElapsed = Memory.HasGameState() ? Memory.ElapsedTime() : lastElapsed;
+            uint gameState = Memory.GameState();
+            currentElapsed = gameState != 0 ? Memory.ElapsedTime() : lastElapsed;
             if (currentElapsed < 0 || currentElapsed > 10000000) { currentElapsed = lastElapsed; }
             TotalSplits = totalSplits;
 
@@ -86,7 +88,7 @@ namespace LiveSplit.EscapeGoat2 {
             Memory.PatchSheepRooms(Running ? false : Settings.SheepRoomPatch);
 
             UpdateDeaths();
-            UpdateRoomTimer();
+            UpdateRoomTimer(gameState);
 
             if (CurrentSplit <= TotalSplits) {
                 CheckSplit(CurrentSplit == TotalSplits, !Running);
@@ -102,20 +104,20 @@ namespace LiveSplit.EscapeGoat2 {
                 }
             }
 
-            lastRoomActive = currentRoomActive;
+            lastRoomState = currentRoomState;
 
             lastElapsed = currentElapsed;
             if (Running) {
                 GameTime = currentElapsed;
             }
         }
-        private void UpdateRoomTimer() {
-            currentRoomActive = Memory.RoomActive();
-            if (currentRoomActive) {
-                if (!lastRoomActive && Math.Abs(currentElapsed - roomTimerStart) > 0.5) {
+        private void UpdateRoomTimer(uint gameState) {
+            currentRoomState = gameState != 0 ? Memory.RoomState() : 0;
+            if (currentRoomState != 0) {
+                if (lastRoomState == 0 && Math.Abs(currentElapsed - roomTimerStart) > 0.5) {
                     roomTimerStart = currentElapsed;
                 }
-            } else if (lastRoomActive && (currentElapsed - roomTimerStart) > 0.5) {
+            } else if (lastRoomState != 0 && (currentElapsed - roomTimerStart) > 0.5) {
                 if (deathTimer > DateTime.Now) {
                     totalDeathTime += currentElapsed - roomTimerStart;
                     DeathTimeLost = totalDeathTime.ToString("0.000");
@@ -143,19 +145,24 @@ namespace LiveSplit.EscapeGoat2 {
                     lastIntValue = mapPosition.X;
                 } else {
                     bool enteredDoor = Memory.EnteredDoor();
-                    ShouldSplit = enteredDoor && !lastBoolValue && currentRoomActive;
+                    ShouldSplit = enteredDoor && !lastBoolValue && currentRoomState != 0;
                     lastBoolValue = enteredDoor;
+                }
+
+                if (ShouldSplit) {
+                    deathTimer = date.AddSeconds(1.2);
+                    return;
                 }
             } else {
                 if (!exitingLevel && date > deathTimer) {
                     bool enteredDoor = Memory.EnteredDoor();
                     int extraCount = Memory.OrbCount() + Memory.SecretRoomCount();
-                    exitingLevel = ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomActive;
+                    exitingLevel = ((enteredDoor && !lastBoolValue) || (extraCount == lastIntValue + 1)) && currentRoomState != 0 && currentRoomState == lastRoomState;
                     lastBoolValue = enteredDoor;
                     lastIntValue = extraCount;
                 }
 
-                ShouldSplit = exitingLevel && (finalSplit || Settings.SplitOnEnterPickup ? true : !currentRoomActive && lastRoomActive);
+                ShouldSplit = exitingLevel && (finalSplit || Settings.SplitOnEnterPickup ? true : currentRoomState == 0 && lastRoomState != 0);
 
                 if (ShouldSplit) {
                     exitingLevel = false;
@@ -164,9 +171,9 @@ namespace LiveSplit.EscapeGoat2 {
                 }
             }
 
-            Paused = !currentRoomActive || Memory.IsPaused();
+            Paused = currentRoomState == 0 || Memory.IsPaused();
 
-            if (Running && date < deathTimer) {
+            if (Running && date <= deathTimer) {
                 exitingLevel = false;
                 ShouldSplit = false;
             } else if (DateTime.Now > splitLate) {

@@ -18,8 +18,8 @@ namespace LiveSplit.EscapeGoat2 {
         OrbCount,
         SecretRooms,
         Paused,
-        HasRoomInstance,
-        HasGameState
+        RoomInstance,
+        GameState
     }
     public class LogManager {
         public const string LOG_FILE = "EscapeGoat.txt";
@@ -75,8 +75,8 @@ namespace LiveSplit.EscapeGoat2 {
 
             lock (currentValues) {
                 DateTime date = DateTime.Now;
-                bool roomInstance = logic.Memory.RoomActive();
-                bool gameState = logic.Memory.HasGameState();
+                uint roomInstance = logic.Memory.RoomState();
+                uint gameState = logic.Memory.GameState();
 
                 foreach (LogObject key in Enum.GetValues(typeof(LogObject))) {
                     string previous = currentValues[key];
@@ -86,18 +86,18 @@ namespace LiveSplit.EscapeGoat2 {
                         case LogObject.CurrentSplit: current = $"{logic.CurrentSplit}"; break;
                         case LogObject.Pointers: current = logic.Memory.GamePointers(); break;
                         case LogObject.Version: current = MemoryManager.Version.ToString(); break;
-                        case LogObject.MapPos: current = gameState ? logic.Memory.CurrentPosition().ToString() : previous; break;
-                        case LogObject.Room: current = roomInstance ? logic.Memory.RoomName() : previous; break;
+                        case LogObject.MapPos: current = gameState != 0 ? logic.Memory.CurrentPosition().ToString() : previous; break;
+                        case LogObject.Room: current = roomInstance != 0 ? logic.Memory.RoomName() : previous; break;
                         //case LogObject.RoomElapsed: current = roomInstance ? logic.Memory.RoomElapsedTime().ToString("0") : previous; break;
                         //case LogObject.Elapsed: current = gameState ? logic.Memory.ElapsedTime().ToString("0") : previous; break;
-                        case LogObject.TotalDeaths: current = gameState ? logic.Memory.TotalDeaths().ToString() : previous; break;
+                        case LogObject.TotalDeaths: current = gameState != 0 ? logic.Memory.TotalDeaths().ToString() : previous; break;
                         case LogObject.TitleShown: current = logic.Memory.TitleShown().ToString(); break;
-                        case LogObject.EnteredDoor: current = roomInstance ? logic.Memory.EnteredDoor().ToString() : previous; break;
-                        case LogObject.OrbCount: current = gameState ? logic.Memory.OrbCount().ToString() : previous; break;
-                        case LogObject.SecretRooms: current = gameState ? logic.Memory.SecretRoomCount().ToString() : previous; break;
+                        case LogObject.EnteredDoor: current = roomInstance != 0 ? logic.Memory.EnteredDoor().ToString() : previous; break;
+                        case LogObject.OrbCount: current = gameState != 0 ? logic.Memory.OrbCount().ToString() : previous; break;
+                        case LogObject.SecretRooms: current = gameState != 0 ? logic.Memory.SecretRoomCount().ToString() : previous; break;
                         case LogObject.Paused: current = logic.Memory.IsPaused().ToString(); break;
-                        case LogObject.HasRoomInstance: current = roomInstance.ToString(); break;
-                        case LogObject.HasGameState: current = gameState.ToString(); break;
+                        case LogObject.RoomInstance: current = $"{roomInstance:X}"; break;
+                        case LogObject.GameState: current = $"{gameState:X}"; break;
                     }
 
                     if (previous != current) {

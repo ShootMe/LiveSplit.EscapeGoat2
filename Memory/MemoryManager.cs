@@ -110,22 +110,22 @@ namespace LiveSplit.EscapeGoat2 {
                 return timer;
             }
         }
-        public bool HasGameState() {
+        public uint GameState() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.GameState
-                return SceneManagerEG2.Read<uint>(Program, 0x4, 0x84) != 0;
+                return SceneManagerEG2.Read<uint>(Program, 0x4, 0x84);
             } else {
                 //SceneManager.ActionSceneInstance.GameState
-                return SceneManagerEG1.Read<uint>(Program, -0xc, 0x80) != 0;
+                return SceneManagerEG1.Read<uint>(Program, -0xc, 0x80);
             }
         }
-        public bool RoomActive() {
+        public uint RoomState() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.RoomInstance
-                return SceneManagerEG2.Read<uint>(Program, 0x4, 0x60) != 0;
+                return SceneManagerEG2.Read<uint>(Program, 0x4, 0x60);
             } else {
                 //SceneManager.ActionSceneInstance.RoomInstance.Enabled
-                return SceneManagerEG1.Read<bool>(Program, -0xc, 0x74, 0x18);
+                return SceneManagerEG1.Read<byte>(Program, -0xc, 0x74, 0x18);
             }
         }
         public bool EnteredDoor() {
