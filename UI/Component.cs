@@ -168,18 +168,18 @@ namespace LiveSplit.EscapeGoat2 {
         }
         public void OnUndoSplit(object sender, EventArgs e) {
             logic.Decrement();
-            log.AddEntry(new EventLogEntry($"Undo Current Split {Model.CurrentState.CurrentTime.RealTime.Value}"));
+            log.AddEntry(new EventLogEntry($"Undo Current Split ({Model.CurrentState.CurrentTime})"));
         }
         public void OnSkipSplit(object sender, EventArgs e) {
             logic.Increment();
-            log.AddEntry(new EventLogEntry($"Skip Current Split {Model.CurrentState.CurrentTime.RealTime.Value}"));
+            log.AddEntry(new EventLogEntry($"Skip Current Split ({Model.CurrentState.CurrentTime})"));
         }
         public void OnSplit(object sender, EventArgs e) {
             if (!isAutosplitting) {
                 logic.Increment();
-                log.AddEntry(new EventLogEntry($"Split Manual {Model.CurrentState.CurrentTime.RealTime.Value}"));
+                log.AddEntry(new EventLogEntry($"Split Manual ({Model.CurrentState.CurrentTime})"));
             } else {
-                log.AddEntry(new EventLogEntry($"Split Auto {Model.CurrentState.CurrentTime.RealTime.Value}"));
+                log.AddEntry(new EventLogEntry($"Split Auto ({Model.CurrentState.CurrentTime})"));
             }
         }
         public void Update(IInvalidator invalidator, LiveSplitState lvstate, float width, float height, LayoutMode mode) {

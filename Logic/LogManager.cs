@@ -92,7 +92,7 @@ namespace LiveSplit.EscapeGoat2 {
                         //case LogObject.Elapsed: current = gameState ? logic.Memory.ElapsedTime().ToString("0") : previous; break;
                         case LogObject.TotalDeaths: current = gameState != 0 ? logic.Memory.TotalDeaths().ToString() : previous; break;
                         case LogObject.TitleShown: current = logic.Memory.TitleShown().ToString(); break;
-                        case LogObject.EnteredDoor: current = roomInstance != 0 ? logic.Memory.EnteredDoor().ToString() : previous; break;
+                        case LogObject.EnteredDoor: current = !logic.Memory.IsEG2 || roomInstance != 0 ? logic.Memory.EnteredDoor().ToString() : previous; break;
                         case LogObject.OrbCount: current = gameState != 0 ? logic.Memory.OrbCount().ToString() : previous; break;
                         case LogObject.SecretRooms: current = gameState != 0 ? logic.Memory.SecretRoomCount().ToString() : previous; break;
                         case LogObject.Paused: current = logic.Memory.IsPaused().ToString(); break;

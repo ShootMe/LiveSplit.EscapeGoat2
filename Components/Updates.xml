@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <updates>
+    <update version="1.2.2">
+        <files>
+            <file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>
+        </files>
+        <changelog>
+            <change> Fix autosplitter not working in some cases for EG1 </change>
+        </changelog>
+    </update>
     <update version="1.2.1">
         <files>
             <file path="Components/LiveSplit.EscapeGoat2.dll" status="changed"/>

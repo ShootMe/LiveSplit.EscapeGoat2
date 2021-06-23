@@ -145,7 +145,7 @@ namespace LiveSplit.EscapeGoat2 {
                     lastIntValue = mapPosition.X;
                 } else {
                     bool enteredDoor = Memory.EnteredDoor();
-                    ShouldSplit = enteredDoor && !lastBoolValue && currentRoomState != 0;
+                    ShouldSplit = enteredDoor && !lastBoolValue;
                     lastBoolValue = enteredDoor;
                 }
 
