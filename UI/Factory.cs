@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !Console
+using System;
 using System.Reflection;
 using LiveSplit.Model;
 using LiveSplit.UI.Components;
@@ -15,3 +16,10 @@ namespace LiveSplit.EscapeGoat2 {
         public Version Version { get { return Assembly.GetExecutingAssembly().GetName().Version; } }
     }
 }
+#else
+namespace LiveSplit.EscapeGoat2 {
+    public class Factory : IComponentFactory {
+        public static string AutosplitterName = "Escape Goat 1/2 Autosplitter";
+    }
+}
+#endif

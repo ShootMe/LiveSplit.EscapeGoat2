@@ -2,7 +2,9 @@
 using System.Diagnostics;
 namespace LiveSplit.EscapeGoat2 {
     public enum PointerVersion {
-        All
+        All,
+        EG1SR,
+        EG1BS
     }
     public enum AutoDeref {
         None,
@@ -12,7 +14,7 @@ namespace LiveSplit.EscapeGoat2 {
     public class ProgramPointer {
         private int lastID;
         private DateTime lastTry;
-        private IFindPointer currentFinder;
+        public IFindPointer CurrentFinder;
         public IntPtr Pointer { get; private set; }
         public IFindPointer[] Finders { get; private set; }
         public string AsmName { get; private set; }
@@ -55,7 +57,7 @@ namespace LiveSplit.EscapeGoat2 {
                 lastID = program.Id;
             } else if (Pointer != IntPtr.Zero) {
                 IntPtr pointer = Pointer;
-                currentFinder.VerifyPointer(program, ref pointer);
+                CurrentFinder.VerifyPointer(program, ref pointer);
                 Pointer = pointer;
             }
 
@@ -64,15 +66,13 @@ namespace LiveSplit.EscapeGoat2 {
 
                 for (int i = 0; i < Finders.Length; i++) {
                     IFindPointer finder = Finders[i];
-                    if (finder.Version == PointerVersion.All || finder.Version == MemoryManager.Version) {
-                        try {
-                            Pointer = finder.FindPointer(program, AsmName);
-                            if (Pointer != IntPtr.Zero || finder.FoundBaseAddress()) {
-                                currentFinder = finder;
-                                break;
-                            }
-                        } catch { }
-                    }
+                    try {
+                        Pointer = finder.FindPointer(program, AsmName);
+                        if (Pointer != IntPtr.Zero || finder.FoundBaseAddress()) {
+                            CurrentFinder = finder;
+                            break;
+                        }
+                    } catch { }
                 }
             }
             return Pointer;
@@ -111,6 +111,7 @@ namespace LiveSplit.EscapeGoat2 {
         private readonly int[] Relative;
         private IntPtr BasePtr;
         private DateTime LastVerified;
+        public bool InExecute = true;
 
         public FindPointerSignature(PointerVersion version, AutoDeref autoDeref, string signature, params int[] relative) {
             Version = version;
@@ -148,9 +149,15 @@ namespace LiveSplit.EscapeGoat2 {
         }
         private IntPtr GetPointer(Process program, string asmName) {
             if (string.IsNullOrEmpty(asmName)) {
-                Searcher.MemoryFilter = delegate (MemInfo info) {
-                    return (info.State & 0x1000) != 0 && (info.Protect & 0x40) != 0 && (info.Protect & 0x100) == 0;
-                };
+                if(InExecute) {
+                    Searcher.MemoryFilter = delegate (MemInfo info) {
+                        return (info.State & 0x1000) != 0 && (info.Protect & 0x40) != 0 && (info.Protect & 0x100) == 0;
+                    };
+                } else {
+                    Searcher.MemoryFilter = delegate (MemInfo info) {
+                        return (info.State & 0x1000) != 0 && info.Protect == 4 && (info.Protect & 0x100) == 0;
+                    };
+                }
             } else {
                 Tuple<IntPtr, IntPtr> range = ProgramPointer.GetAddressRange(program, asmName);
                 Searcher.MemoryFilter = delegate (MemInfo info) {

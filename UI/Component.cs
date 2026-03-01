@@ -6,9 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+#if !Console
 using LiveSplit.Model;
 using LiveSplit.UI;
 using LiveSplit.UI.Components;
+#endif
 namespace LiveSplit.EscapeGoat2 {
     public class Component : IComponent {
         public string ComponentName { get { return Factory.AutosplitterName; } }
@@ -22,7 +24,6 @@ namespace LiveSplit.EscapeGoat2 {
         private bool isAutosplitting = false;
         private TextComponent deathComponent, roomComponent;
         private DateTime lastInfoCheck = DateTime.MinValue;
-        private bool stillHolding;
 #if Console
         public static void Main(string[] args) {
             Component component = new Component(new LiveSplitState());
@@ -77,7 +78,6 @@ namespace LiveSplit.EscapeGoat2 {
                                 PulseLog();
                             }
                             HandleLogic();
-                            HandleInputs();
                         } catch (Exception ex) {
                             log.AddEntry(new EventLogEntry(ex.ToString()));
                         }
@@ -98,23 +98,6 @@ namespace LiveSplit.EscapeGoat2 {
                     }
                 } catch { }
             }, TaskCreationOptions.LongRunning);
-        }
-        private void HandleInputs() {
-            if ((Model == null || Model.CurrentState.CurrentPhase == TimerPhase.NotRunning) && logic.Memory.Program?.MainWindowHandle == Utility.GetForegroundWindow()) {
-                if (Utility.IsKeyDown(Keys.ControlKey) && Utility.IsKeyDown(Keys.A)) {
-                    if (!stillHolding) {
-                        logic.Memory.MoveToPreviousLevel();
-                        stillHolding = true;
-                    }
-                } else if (Utility.IsKeyDown(Keys.ControlKey) && Utility.IsKeyDown(Keys.D)) {
-                    if (!stillHolding) {
-                        logic.Memory.MoveToNextLevel();
-                        stillHolding = true;
-                    }
-                } else {
-                    stillHolding = false;
-                }
-            }
         }
         private void HandleLogic() {
             if (Model == null) { return; }

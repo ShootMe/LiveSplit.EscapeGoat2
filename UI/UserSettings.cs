@@ -4,7 +4,9 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml;
+#if !Console
 using LiveSplit.Model;
+#endif
 namespace LiveSplit.EscapeGoat2 {
     public partial class UserSettings : UserControl {
         public SplitterSettings Settings { get; set; }

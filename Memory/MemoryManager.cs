@@ -4,7 +4,8 @@ namespace LiveSplit.EscapeGoat2 {
     //.load C:\Windows\Microsoft.NET\Framework\v4.0.30319\SOS.dll
     public partial class MemoryManager {
         //MagicalTimeBean.Bastille.BastilleGame::InitializeScenes
-        private static ProgramPointer SceneManagerEG1 = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.Single, "8B40048B4804FF15????????FF15????????B9????????E8????????8BF88B1D", 0x20));
+        private static ProgramPointer SceneManagerEG1 = new ProgramPointer(new FindPointerSignature(PointerVersion.EG1SR, AutoDeref.None, "EEAC6824DF9B5713") { InExecute = false },
+            new FindPointerSignature(PointerVersion.EG1BS, AutoDeref.Single, "8B40048B4804FF15????????FF15????????B9????????E8????????8BF88B1D", 0x20));
         //???
         private static ProgramPointer SceneManagerEG2 = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.Single, "558BEC56833D????????00740B81E2FF00000075035E5DC333F683F908734BFF248D", 0x6));
         private static ProgramPointer IsSheepObtainedHere = new ProgramPointer(new FindPointerSignature(PointerVersion.All, AutoDeref.None, "568B51783A42588D4A588B318B41048BF88B4A1057563909E8????????25??0000005E5FC3", 0x1e));
@@ -37,9 +38,11 @@ namespace LiveSplit.EscapeGoat2 {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance._suspendPlayerInput
                 return SceneManagerEG2.Read<bool>(Program, 0x4, 0x94);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance._suspendPlayerInput
                 return SceneManagerEG1.Read<bool>(Program, -0xc, 0x70, 0x1a);
+            } else {
+                return SceneManagerEG1.Read<bool>(Program, 9);
             }
         }
         public MapPosition CurrentPosition() {
@@ -48,10 +51,12 @@ namespace LiveSplit.EscapeGoat2 {
                 MapPosition map = SceneManagerEG2.Read<MapPosition>(Program, 0x4, 0x84, 0x58);
                 map.ValidatePosition();
                 return map;
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance._currentLocation.RegionType
                 //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
                 return SceneManagerEG1.Read<MapPosition>(Program, -0xc, 0x90, 0x4);
+            } else {
+                return SceneManagerEG1.Read<MapPosition>(Program, 12);
             }
         }
         public string RoomName() {
@@ -67,8 +72,11 @@ namespace LiveSplit.EscapeGoat2 {
                     }
                 }
                 return roomName;
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 return SceneManagerEG1.Read<int>(Program, -0xc, 0x74, 0x8c).ToString();
+            } else {
+                int roomid = SceneManagerEG1.Read<int>(Program, 28);
+                return roomid.ToString();
             }
         }
         public int OrbCount() {
@@ -91,16 +99,18 @@ namespace LiveSplit.EscapeGoat2 {
             if (IsEG2) {
                 //SceneManager.TitleScreenInstance._titleShown
                 return SceneManagerEG2.Read<bool>(Program, 0xc, 0x94);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.TitleScreenInstance.Visible
                 return SceneManagerEG1.Read<bool>(Program, -0x4, 0x1a);
+            } else {
+                return SceneManagerEG1.Read<bool>(Program, 10);
             }
         }
         public int TitleTextFadeTime() {
             if (IsEG2) {
                 //SceneManager.TitleScreenInstance._titleTextFadeTimer
                 return SceneManagerEG2.Read<int>(Program, 0xc, 0x8c);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.TitleScreenInstance._SaveGameToLaunch
                 uint saveGame = SceneManagerEG1.Read<uint>(Program, -0x4, 0x84);
                 //SceneManager.TitleScreenInstance._SaveGameToLaunch._totalTime
@@ -108,33 +118,41 @@ namespace LiveSplit.EscapeGoat2 {
                 //SceneManager.TitleScreenInstance._fader._fadeOutFrames
                 int timer = saveGame != 0 && ticks == 0 ? SceneManagerEG1.Read<int>(Program, -0x4, 0x6c, 0x68) : 0;
                 return timer;
+            } else {
+                return SceneManagerEG1.Read<int>(Program, 36);
             }
         }
         public uint GameState() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.GameState
                 return SceneManagerEG2.Read<uint>(Program, 0x4, 0x84);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState
                 return SceneManagerEG1.Read<uint>(Program, -0xc, 0x80);
+            } else {
+                return SceneManagerEG1.Read<uint>(Program, 48);
             }
         }
         public uint RoomState() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.RoomInstance
                 return SceneManagerEG2.Read<uint>(Program, 0x4, 0x60);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.RoomInstance.Enabled
                 return SceneManagerEG1.Read<byte>(Program, -0xc, 0x74, 0x18);
+            } else {
+                return SceneManagerEG1.Read<byte>(Program, 11);
             }
         }
         public bool EnteredDoor() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.RoomInstance.StopCountingElapsedTime
                 return SceneManagerEG2.Read<bool>(Program, 0x4, 0x60, 0xca);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance._state
                 return SceneManagerEG1.Read<ActionSceneStates>(Program, -0xc, 0xb0) == ActionSceneStates.ExitingCurrentRoom;
+            } else {
+                return SceneManagerEG1.Read<byte>(Program, 8) == (byte)ActionSceneStates.ExitingCurrentRoom;
             }
         }
         public double RoomElapsedTime() {
@@ -149,36 +167,22 @@ namespace LiveSplit.EscapeGoat2 {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.GameState._totalTime
                 return (double)SceneManagerEG2.Read<long>(Program, 0x4, 0x84, 0x3c) / (double)10000000;
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState._totalTime
                 return (double)SceneManagerEG1.Read<long>(Program, -0xc, 0x80, 0x30) / (double)10000000;
+            } else {
+                return (double)SceneManagerEG1.Read<long>(Program, 40) / (double)10000000;
             }
         }
         public int TotalDeaths() {
             if (IsEG2) {
                 //SceneManager.ActionSceneInstance.GameState.TotalDeathCount
                 return SceneManagerEG2.Read<int>(Program, 0x4, 0x84, 0x2c);
-            } else {
+            } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState.TotalDeathCount
                 return SceneManagerEG1.Read<int>(Program, -0xc, 0x80, 0x18);
-            }
-        }
-        public void MoveToPreviousLevel() {
-            if (!IsEG2) {
-                //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
-                int pos = SceneManagerEG1.Read<int>(Program, -0xc, 0x90, 0x8);
-                if (pos > 0) {
-                    //SceneManager.ActionSceneInstance._nextLocation.RegionPosition
-                    SceneManagerEG1.Write<int>(Program, pos - 1, -0xc, 0x94, 0x8);
-                }
-            }
-        }
-        public void MoveToNextLevel() {
-            if (!IsEG2) {
-                //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
-                int pos = SceneManagerEG1.Read<int>(Program, -0xc, 0x90, 0x8);
-                //SceneManager.ActionSceneInstance._nextLocation.RegionPosition
-                SceneManagerEG1.Write<int>(Program, pos + 1, -0xc, 0x94, 0x8);
+            } else {
+                return SceneManagerEG1.Read<int>(Program, 32);
             }
         }
         public bool HookProcess() {
