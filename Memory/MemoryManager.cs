@@ -14,6 +14,7 @@ namespace LiveSplit.EscapeGoat2 {
         public bool IsHooked { get; set; }
         public DateTime LastHooked { get; set; }
         public bool IsEG2 { get; set; } = true;
+        public bool EG105 = false;
         private bool? sheepRoomPatch;
 
         public MemoryManager() {
@@ -39,7 +40,10 @@ namespace LiveSplit.EscapeGoat2 {
                 //SceneManager.ActionSceneInstance._suspendPlayerInput
                 return SceneManagerEG2.Read<bool>(Program, 0x4, 0x94);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
-                //SceneManager.ActionSceneInstance._suspendPlayerInput
+                //SceneManager.ActionSceneInstance._pauseMenu.visible
+                if (EG105) {
+                    return SceneManagerEG1.Read<bool>(Program, -0xc, 0x74, 0x1a);
+                }
                 return SceneManagerEG1.Read<bool>(Program, -0xc, 0x70, 0x1a);
             } else {
                 return SceneManagerEG1.Read<bool>(Program, 9);
@@ -54,6 +58,9 @@ namespace LiveSplit.EscapeGoat2 {
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance._currentLocation.RegionType
                 //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
+                if (EG105) {
+                    return SceneManagerEG1.Read<MapPosition>(Program, -0xc, 0x94, 0x4);
+                }
                 return SceneManagerEG1.Read<MapPosition>(Program, -0xc, 0x90, 0x4);
             } else {
                 return SceneManagerEG1.Read<MapPosition>(Program, 12);
@@ -73,6 +80,13 @@ namespace LiveSplit.EscapeGoat2 {
                 }
                 return roomName;
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
+                if (EG105) {
+                    //SceneManager.ActionSceneInstance._currentLocation.RegionPosition
+                    int regionPosition = SceneManagerEG1.Read<int>(Program, -0xc, 0x94, 0x8);
+                    //SceneManager.ActionSceneInstance._currentRegionDef._roomList[regionPosition]
+                    return SceneManagerEG1.Read<int>(Program, -0xc, 0x90, 0x10, 0x4, 0x8 + 4 * regionPosition).ToString();
+                }
+                //SceneManager.ActionSceneInstance.RoomInstance.RoomID
                 return SceneManagerEG1.Read<int>(Program, -0xc, 0x74, 0x8c).ToString();
             } else {
                 int roomid = SceneManagerEG1.Read<int>(Program, 28);
@@ -111,13 +125,23 @@ namespace LiveSplit.EscapeGoat2 {
                 //SceneManager.TitleScreenInstance._titleTextFadeTimer
                 return SceneManagerEG2.Read<int>(Program, 0xc, 0x8c);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
-                //SceneManager.TitleScreenInstance._SaveGameToLaunch
-                uint saveGame = SceneManagerEG1.Read<uint>(Program, -0x4, 0x84);
-                //SceneManager.TitleScreenInstance._SaveGameToLaunch._totalTime
-                long ticks = saveGame == 0 ? 0L : SceneManagerEG1.Read<long>(Program, -0x4, 0x84, 0x30);
-                //SceneManager.TitleScreenInstance._fader._fadeOutFrames
-                int timer = saveGame != 0 && ticks == 0 ? SceneManagerEG1.Read<int>(Program, -0x4, 0x6c, 0x68) : 0;
-                return timer;
+                if (EG105) {
+                    //SceneManager.TitleScreenInstance._SaveGameToLaunch
+                    uint saveGame = SceneManagerEG1.Read<uint>(Program, -0x4, 0x88);
+                    //SceneManager.TitleScreenInstance._SaveGameToLaunch._totalTime
+                    long ticks = saveGame == 0 ? 0L : SceneManagerEG1.Read<long>(Program, -0x4, 0x88, 0x30);
+                    //SceneManager.TitleScreenInstance._fader._fadeOutFrames
+                    int timer = saveGame != 0 && ticks == 0 ? SceneManagerEG1.Read<int>(Program, -0x4, 0x70, 0x74) : 0;
+                    return timer;
+                } else {
+                    //SceneManager.TitleScreenInstance._SaveGameToLaunch
+                    uint saveGame = SceneManagerEG1.Read<uint>(Program, -0x4, 0x84);
+                    //SceneManager.TitleScreenInstance._SaveGameToLaunch._totalTime
+                    long ticks = saveGame == 0 ? 0L : SceneManagerEG1.Read<long>(Program, -0x4, 0x84, 0x30);
+                    //SceneManager.TitleScreenInstance._fader._fadeOutFrames
+                    int timer = saveGame != 0 && ticks == 0 ? SceneManagerEG1.Read<int>(Program, -0x4, 0x6c, 0x68) : 0;
+                    return timer;
+                }
             } else {
                 return SceneManagerEG1.Read<int>(Program, 36);
             }
@@ -128,6 +152,9 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG2.Read<uint>(Program, 0x4, 0x84);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState
+                if (EG105) {
+                    return SceneManagerEG1.Read<uint>(Program, -0xc, 0x84);
+                }
                 return SceneManagerEG1.Read<uint>(Program, -0xc, 0x80);
             } else {
                 return SceneManagerEG1.Read<uint>(Program, 48);
@@ -139,6 +166,9 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG2.Read<uint>(Program, 0x4, 0x60);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.RoomInstance.Enabled
+                if (EG105) {
+                    return SceneManagerEG1.Read<uint>(Program, -0xc, 0x78, 0x18);
+                }
                 return SceneManagerEG1.Read<byte>(Program, -0xc, 0x74, 0x18);
             } else {
                 return SceneManagerEG1.Read<byte>(Program, 11);
@@ -150,6 +180,9 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG2.Read<bool>(Program, 0x4, 0x60, 0xca);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance._state
+                if (EG105) {
+                    return SceneManagerEG1.Read<ActionSceneStates>(Program, -0xc, 0xb4) == ActionSceneStates.ExitingCurrentRoom;
+                }
                 return SceneManagerEG1.Read<ActionSceneStates>(Program, -0xc, 0xb0) == ActionSceneStates.ExitingCurrentRoom;
             } else {
                 return SceneManagerEG1.Read<byte>(Program, 8) == (byte)ActionSceneStates.ExitingCurrentRoom;
@@ -169,6 +202,9 @@ namespace LiveSplit.EscapeGoat2 {
                 return (double)SceneManagerEG2.Read<long>(Program, 0x4, 0x84, 0x3c) / (double)10000000;
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState._totalTime
+                if (EG105) {
+                    return SceneManagerEG1.Read<long>(Program, -0xc, 0x84, 0x30) / (double)10000000;
+                }
                 return (double)SceneManagerEG1.Read<long>(Program, -0xc, 0x80, 0x30) / (double)10000000;
             } else {
                 return (double)SceneManagerEG1.Read<long>(Program, 40) / (double)10000000;
@@ -180,6 +216,9 @@ namespace LiveSplit.EscapeGoat2 {
                 return SceneManagerEG2.Read<int>(Program, 0x4, 0x84, 0x2c);
             } else if ((SceneManagerEG1.CurrentFinder?.Version).GetValueOrDefault(PointerVersion.EG1BS) == PointerVersion.EG1BS) {
                 //SceneManager.ActionSceneInstance.GameState.TotalDeathCount
+                if (EG105) {
+                    return SceneManagerEG1.Read<int>(Program, -0xc, 0x84, 0x18);
+                }
                 return SceneManagerEG1.Read<int>(Program, -0xc, 0x80, 0x18);
             } else {
                 return SceneManagerEG1.Read<int>(Program, 32);
@@ -200,6 +239,10 @@ namespace LiveSplit.EscapeGoat2 {
 
                 if (Program != null && !Program.HasExited) {
                     IsEG2 = Program.ProcessName.Equals("EscapeGoat2", StringComparison.OrdinalIgnoreCase);
+                    if (!IsEG2) {
+                        FileVersionInfo info = FileVersionInfo.GetVersionInfo(Program.MainModule.FileName);
+                        EG105 = info.FileVersion == "1.0.5";
+                    }
                     MemoryReader.Update64Bit(Program);
                     MemoryManager.Version = PointerVersion.All;
                     IsHooked = true;

@@ -139,7 +139,7 @@ namespace LiveSplit.EscapeGoat2 {
             if (CurrentSplit == 0) {
                 ShouldSplit = Memory.TitleShown() && Memory.TitleTextFadeTime() > 0;
             } else if (!Memory.IsEG2) {
-                if (TotalSplits == 10 && !finalSplit) {
+                if (TotalSplits < 20 && !finalSplit) {
                     MapPosition mapPosition = Memory.CurrentPosition();
                     ShouldSplit = mapPosition.X == 10 && lastIntValue != 10;
                     lastIntValue = mapPosition.X;
