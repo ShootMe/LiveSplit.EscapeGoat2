@@ -15,7 +15,7 @@ namespace LiveSplit.EscapeGoat2 {
         private uint currentRoomState, lastRoomState;
         private int lastIntValue;
         private DateTime splitLate, deathTimer;
-        private int TotalSplits, lastDeathCount;
+        private int TotalSplits, lastDeathCount, endRunTimer;
         private double roomTimerStart, currentElapsed, totalDeathTime, lastElapsed;
         public LogicManager(SplitterSettings settings) {
             Memory = new MemoryManager();
@@ -28,12 +28,15 @@ namespace LiveSplit.EscapeGoat2 {
             Paused = false;
             Running = false;
             CurrentSplit = 0;
+            endRunTimer = 0;
             InitializeSplit();
             ShouldSplit = false;
             ShouldReset = false;
             ResetCustomStats();
         }
         public void Decrement() {
+            Running = true;
+            endRunTimer = 0;
             CurrentSplit--;
             splitLate = DateTime.MaxValue;
             InitializeSplit();
@@ -104,6 +107,17 @@ namespace LiveSplit.EscapeGoat2 {
                 }
             }
 
+            if (CurrentSplit > TotalSplits && Running) {
+                if (lastElapsed == currentElapsed) {
+                    endRunTimer++;
+                } else if (endRunTimer < 30) {
+                    endRunTimer = 0;
+                }
+                if (endRunTimer > 30) {
+                    Running = false;
+                }
+            }
+
             lastRoomState = currentRoomState;
 
             lastElapsed = currentElapsed;
@@ -144,9 +158,21 @@ namespace LiveSplit.EscapeGoat2 {
                     ShouldSplit = mapPosition.X == 10 && lastIntValue != 10;
                     lastIntValue = mapPosition.X;
                 } else {
-                    bool enteredDoor = Memory.EnteredDoor();
-                    ShouldSplit = enteredDoor && !lastBoolValue;
-                    lastBoolValue = enteredDoor;
+                    if (TotalSplits < 20) {
+                        MapPosition mapPosition = Memory.CurrentPosition();
+                        if ((mapPosition.X == 9 && mapPosition.Y == 9) || ((mapPosition.X == 1 || mapPosition.X == 2) && mapPosition.Y == 5)) {
+                            bool enteredDoor = Memory.EnteredDoor();
+                            ShouldSplit = enteredDoor && !lastBoolValue;
+                            lastBoolValue = enteredDoor;
+                            if (ShouldSplit && mapPosition.X != 9) {
+                                endRunTimer = 30;
+                            }
+                        }
+                    } else {
+                        bool enteredDoor = Memory.EnteredDoor();
+                        ShouldSplit = enteredDoor && !lastBoolValue;
+                        lastBoolValue = enteredDoor;
+                    }
                 }
 
                 if (ShouldSplit) {
